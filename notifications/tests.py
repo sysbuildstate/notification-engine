@@ -1,3 +1,6 @@
 from django.test import TestCase
+from django.apps import apps
 
-# Create your tests here.
+class NotificationAppTests(TestCase):
+    def test_app_config(self):
+        self.assertEqual(apps.get_app_config('notifications').name, 'notifications')
