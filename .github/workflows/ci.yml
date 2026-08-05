@@ -26,6 +26,15 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
+      redis:
+        image: redis:7
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
 
     steps:
       - uses: actions/checkout@v4
@@ -42,6 +51,7 @@ jobs:
           DJANGO_SECRET_KEY: ci-test-key-not-for-production
           DEBUG: True
           DATABASE_URL: postgres://postgres:postgres@localhost:5432/notification_db
+          REDIS_URL: redis://localhost:6379/0
           ALLOWED_HOSTS: localhost
         run: |
           python manage.py makemigrations
