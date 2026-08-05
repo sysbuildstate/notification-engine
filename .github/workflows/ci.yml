@@ -12,6 +12,21 @@ jobs:
   build-and-test:
     runs-on: ubuntu-latest
 
+    services:
+      postgres:
+        image: postgres:15
+        env:
+          POSTGRES_DB: notification_db
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     steps:
       - uses: actions/checkout@v4
 
@@ -23,4 +38,12 @@ jobs:
 
       - run: pip install -r requirements.txt
 
-      - run: python manage.py check
+      - env:
+          DJANGO_SECRET_KEY: ci-test-key-not-for-production
+          DEBUG: True
+          DATABASE_URL: postgres://postgres:postgres@localhost:5432/notification_db
+          ALLOWED_HOSTS: localhost
+        run: |
+          python manage.py makemigrations
+          python manage.py migrate
+          python manage.py check
